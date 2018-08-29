@@ -1,0 +1,122 @@
+USE [AdvisoryCircle]
+GO
+/****** Object:  StoredProcedure [dbo].[DoSomething]    Script Date: 29-08-18 01:07:49 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER PROCEDURE [dbo].[DoSomethingNew] 
+		@EntityId		VARCHAR(10) = 'ABC10',
+		@AccountId		VARCHAR(10)	= NULL,
+		@PageSize		INT			= 10,
+		@PageNum		INT			= 1,
+		@AccountName	VARCHAR(50)	= NULL,
+		@EntityName		VARCHAR(50)	= NULL
+
+AS
+BEGIN
+		-- SET NOCOUNT ON added to prevent extra result sets from
+		-- interfering with SELECT statements.
+		SET NOCOUNT ON;
+		SET DEADLOCK_PRIORITY LOW;
+
+		DECLARE @RowMin		INT = (@PageNum - 1) * @PageSize + 1;
+		DECLARE @RowMax		INT = @PageNum * @PageSize;
+
+		CREATE TABLE #TempResultSet (
+				 EntityId		VARCHAR(10)	
+				,EntityName		VARCHAR(50)
+				,EntityDate		DATETIME
+				,AccountId		VARCHAR(10)
+				,ProcessingId	VARCHAR(10)
+				,EntityId_Acc	VARCHAR(10)
+				,AccountName	VARCHAR(50)
+				,CreatedOn		DATETIME
+		);
+
+		INSERT INTO #TempResultSet (
+				 AccountId	
+				,ProcessingId
+				,EntityId_Acc
+				,AccountName
+				,CreatedOn
+		)
+		SELECT    
+				 [AccountId]
+				,[ProcessingId]
+				,[EntityId]
+				,[AccountName]
+				,[CreatedOn]
+			FROM  
+				dbo.[Account]
+			WHERE
+				( ISNULL(@AccountId, '') = '' OR [AccountId] = @AccountId ) AND
+				( ISNULL(@AccountName, '') = '' OR [AccountName] = @AccountName) AND
+				( ISNULL(@EntityId, '') = '' OR [EntityId] = @EntityId OR [ProcessingId] = @EntityId )
+	
+		UPDATE tr
+			SET
+				tr.[EntityId]	= e.[EntityId],
+				tr.[EntityName] = e.[EntityName],
+				tr.[EntityDate] = e.[EntityDate]
+			FROM
+				#TempResultSet			tr INNER JOIN
+				[dbo].[Entity]			e with (nolock) ON tr.[EntityId_Acc] = e.[EntityId]
+			WHERE
+				( ISNULL(@EntityId, '') = '' OR e.[EntityId] = @EntityId) AND
+				( ISNULL(@EntityName, '') = '' OR e.[EntityName] = @EntityName)
+
+		UPDATE tr
+			SET
+				tr.[EntityId]	= e.[EntityId],
+				tr.[EntityName] = e.[EntityName],
+				tr.[EntityDate] = e.[EntityDate]
+			FROM
+				#TempResultSet			tr INNER JOIN
+				[dbo].[Entity]			e with (nolock) ON tr.[ProcessingId] = e.[EntityId]
+			WHERE
+				( ISNULL(@EntityId, '') = '' OR e.[EntityId] = @EntityId) AND
+				( ISNULL(@EntityName, '') = '' OR e.[EntityName] = @EntityName)
+		
+		INSERT INTO #TempResultSet (
+				 EntityId		
+				,EntityName	
+				,EntityDate
+				,[CreatedOn]
+		)
+		SELECT 
+				 e.[EntityId]
+				,e.[EntityName]
+				,e.[EntityDate]
+				,e.[CreatedOn]
+			FROM
+					[dbo].[Entity]		e with (nolock) LEFT JOIN
+					#TempResultSet		td ON e.[EntityId] = td.[EntityId]
+			WHERE
+				td.[AccountId] IS NULL AND
+				( ISNULL(@EntityId, '') = '' OR e.[EntityId] = @EntityId) AND
+				( ISNULL(@EntityName, '') = '' OR e.[EntityName] = @EntityName)
+
+		;WITH Results_CTE AS
+		(
+			SELECT
+				 *
+				,ROW_NUMBER() OVER (ORDER BY [CreatedOn]) AS RowNum
+			FROM #TempResultSet
+		)
+
+		SELECT * FROM Results_CTE WHERE RowNum BETWEEN @RowMin AND @RowMax
+
+		SELECT COUNT(1) As TotalCount FROM #TempResultSet
+
+		DROP TABLE #TempResultSet
+		
+END
+
+
+
