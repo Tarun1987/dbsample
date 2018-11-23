@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Sample list</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Loading Bootstrap -->
+    <link href="css/vendor/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- Loading Flat UI Pro -->
+    <link href="css/flat-ui.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>History</h1>
+      <div class="row">
+        <div class="col-md-6"><ul class="list-group" id="history"></ul></div>
+      </div>
+    </div>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script
+      src="https://code.jquery.com/jquery-3.3.1.min.js"
+      integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+      crossorigin="anonymous"
+    ></script>
+
+    <!-- Bootstrap 4 requires Popper.js -->
+    <script type="text/javascript">
+      let params = window.location.href.split("?params=")[1];
+      let innerStr = "";
+      let allParams = params.split("|");
+      allParams.forEach(p => {
+        innerStr += '<li class="list-group-item">' + p + "</li>";
+      });
+
+      $("#history").html(innerStr);
+    </script>
+  </body>
+</html>
