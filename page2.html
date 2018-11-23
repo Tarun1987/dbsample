@@ -17,25 +17,21 @@
       <div class="row">
         <div class="col-md-6" id="history" >
           <h2>Some heading</h2>
-        </ul>
       </div>
       </div>
     </div>
 
     <!-- Bootstrap 4 requires Popper.js -->
     <script type="text/javascript">
-      let params = window.location.href.split("?params=")[1];
-      let innerStr = "";
-      let allParams = params.split("|");
-      allParams.forEach(p => {
-        var node = document.createElement("h4");
-        var textNode = document.createTextNode(p);
-        node.appendChild(textNode);
-        document.getElementById("history").appendChild(node);
-      });
-
-     
+      var params = window.location.href.split("#params=")[1];
+      var allParams = params.split("|");
+	  for(var i = 0; i< allParams.length; i++) {
+	    var _js = document.createElement("h4");
+        var textNode = document.createTextNode(allParams[i]);
+        _js.appendChild(textNode);
+        document.getElementById("history").appendChild(_js);	  
+	  }    
       
     </script>
-  </body>
+  </body
 </html>
