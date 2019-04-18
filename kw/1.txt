@@ -1,0 +1,6 @@
+
+- Primary Contact : Should be a Fancy textbox & Drop down
+
+- Gap b/w two inputs
+
+- 
