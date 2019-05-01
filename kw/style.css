@@ -144,7 +144,7 @@ input[type=checkbox]+label {
     display: block;
     margin: 0.2em;
     cursor: pointer;
-    background-color: aqua;
+    background-color: grey;
     border-radius: 5px;
     color: rgb(73, 80, 87);
     font-weight: normal;
@@ -160,6 +160,10 @@ input[type=checkbox]+label {
         "Segoe UI Symbol";
     font-size: 16px;
     /* padding: 2em; */
+}
+
+input[type=checkbox]:checked+label {
+    background-color: aqua;
 }
 
 input[type=checkbox] {
@@ -180,7 +184,7 @@ input[type=checkbox]+label:before {
     color: transparent;
     transition: .2s;
     margin-right: 10px;
-    border-right: .1em solid white
+    border: .1em solid red
 }
 
 input[type=checkbox]+label:active:before {
@@ -204,4 +208,38 @@ input[type=checkbox]:checked+label:before {
 
 .hide-cb-label label::before {
     border: 1px solid #000 !important;
+}
+
+.inner-tbl {
+    display: inline-block;
+    float: none;
+}
+
+.inner-tbl td {
+    height: 30px !important;
+}
+
+table {
+    border-spacing: 0 !important
+}
+
+.table-head td {
+    background-color: rgba(86, 61, 124, 0.15);
+    color: rgb(33, 37, 41);
+    font-size: 16px;
+    padding-bottom: 12px;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 12px;
+    text-align: center;
+    text-size-adjust: 100%;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    width: auto;
+    border-radius: 3px;
+    border-right: 1px solid white;
+}
+
+.table-head td:nth-child(even) {
+    padding-left: 0 !important;
+    padding-right: 0 !important
 }
