@@ -1,0 +1,18 @@
+public static string ApiFLAService(string apiUrl, string authToken, string jsonData)
+        {
+            var client = new RestClient(apiUrl);
+            var request = new RestRequest(Method.POST);
+            request.AddHeader("content-type", "application/json");
+            request.AddHeader("Authorization", authToken);
+          //  request.Timeout = 
+            request.AddParameter("application/json", jsonData, ParameterType.RequestBody);
+            ServicePointManager.ServerCertificateValidationCallback = ValidateServerCertificate;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+            IRestResponse response = client.Execute(request);
+            return response.Content;
+        }
+
+        internal static bool ValidateServerCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        {
+            return true;
+        }
