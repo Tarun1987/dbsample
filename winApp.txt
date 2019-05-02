@@ -10,6 +10,9 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Net.Http;
 using Newtonsoft.Json;
+using System.Net;
+using System.Security.Cryptography.X509Certificates;
+using System.Net.Security;
 
 namespace WinApp
 {
@@ -60,6 +63,9 @@ namespace WinApp
 
                     var content = new FormUrlEncodedContent(values);
 
+                    ServicePointManager.ServerCertificateValidationCallback = ValidateServerCertificate;
+                    ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+
                     var apiResponse = await client.PostAsync(apiUrl, content);
 
                     var apiResponseString = await apiResponse.Content.ReadAsStringAsync();
@@ -76,6 +82,16 @@ namespace WinApp
             }
 
             return new JsonResponse();
+
+        }
+
+        private bool ValidateServerCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        {
+            return true;
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
 
         }
     }
