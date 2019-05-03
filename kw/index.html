@@ -282,6 +282,9 @@
 
     <script type="text/javascript">
       var primaryCB = document.getElementById("acta");
+      window.addEventListener("DOMContentLoaded", event => {
+        changeCheckStatus(primaryCB.checked);
+      });
 
       primaryCB.addEventListener("change", function() {
         changeCheckStatus(this.checked);
@@ -289,6 +292,7 @@
 
       function changeCheckStatus(checkStatus) {
         document.getElementById("acta10").disabled = !checkStatus;
+        if (!checkStatus) document.getElementById("acta10").checked = false;
       }
     </script>
   </body>
