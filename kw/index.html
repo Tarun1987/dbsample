@@ -7,6 +7,8 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Test html</title>
     <link href="style.css" type="text/css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+        integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 </head>
 
 <body>
@@ -124,7 +126,8 @@
                             <tr>
                                 <td>
                                     <span title="Acta constitition -1" class="ms-RadioText">
-                                        <input id="acta" type="checkbox" aria-label="Documents acta constitition - 1" />
+                                        <input id="acta" checked="true" type="checkbox"
+                                            aria-label="Documents acta constitition - 1" />
                                         <label for="acta">Acta constitition</label>
                                     </span>
                                 </td>
@@ -141,25 +144,25 @@
                             <tr>
                                 <td>
                                     <span title="Acta constitition- 2" class="ms-RadioText">
-                                        <input id="acta2" type="checkbox"
+                                        <input id="acta3" type="checkbox"
                                             aria-label="Documents acta constitition - 2" />
-                                        <label for="acta2">Acta constitition - 2</label>
+                                        <label for="acta3">Acta constitition - 2</label>
                                     </span>
                                 </td>
                             </tr>
                             <tr>
                                 <td>
                                     <span title="Acta constitition- 2" class="ms-RadioText">
-                                        <input id="acta2" type="checkbox"
+                                        <input id="acta4" type="checkbox"
                                             aria-label="Documents acta constitition - 2" />
-                                        <label for="acta2">Acta constitition - 2</label>
+                                        <label for="acta4">Acta constitition - 2</label>
                                     </span>
                                 </td>
                             </tr>
                             <tr>
                                 <td>
                                     <span title="Acta constitition- 2" class="ms-RadioText">
-                                        <input id="acta2" type="checkbox"
+                                        <input id="acta5" type="checkbox"
                                             aria-label="Documents acta constitition - 2" />
                                         <label for="acta2">Acta constitition - 2</label>
                                     </span>
@@ -176,9 +179,9 @@
                             <tr>
                                 <td class="hide-cb-label">
                                     <span title="Acta constitition- 3" class="ms-RadioText">
-                                        <input id="acta3" type="checkbox"
+                                        <input id="acta10" type="checkbox"
                                             aria-label="Documents acta constitition - 3" />
-                                        <label for="acta3">Acta constitition - 3</label>
+                                        <label for="acta10">Acta constitition - 3</label>
                                     </span>
                                 </td>
                             </tr>
@@ -232,7 +235,24 @@
     </table>
 
 
+    <script type="text/javascript">
+        $(function () {
 
+            // Add event list
+            $('#acta').change(function () {
+                changeCheckStatus($(this).is(":checked"));
+            });
+
+            // To change default check status
+            changeCheckStatus($('#acta').is(":checked"));
+
+        });
+
+
+        function changeCheckStatus(checkStatus) {
+            $("#acta10").prop('checked', checkStatus);
+        }
+    </script>
 
 </body>
 
