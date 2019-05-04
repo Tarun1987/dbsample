@@ -6,11 +6,6 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Test html</title>
     <link href="style.css" type="text/css" rel="stylesheet" />
-    <!-- <script
-      src="https://code.jquery.com/jquery-3.4.1.min.js"
-      integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
-      crossorigin="anonymous"
-    ></script> -->
   </head>
 
   <body>
@@ -282,7 +277,7 @@
 
     <script type="text/javascript">
       var primaryCB = document.getElementById("acta");
-      window.addEventListener("DOMContentLoaded", event => {
+      window.addEventListener("DOMContentLoaded", function(event) {
         changeCheckStatus(primaryCB.checked);
       });
 
