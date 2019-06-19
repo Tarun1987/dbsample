@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+Enter Date 1: <input type="text" id="date1" onblur="myFunction()">
+Date 2: <input type="text" id="date2">
+
+<script>
+function myFunction() {
+  var str = document.getElementById("date1").value;
+  if(Date.parse(str)) {
+     var dt = new Date(str);
+     var dt2 = dt.setMonth(dt.getMonth() + 4);
+     document.getElementById("date2").value = ( dt.getFullYear() + '-' + ("0" + dt.getMonth()).slice(-2) + '-' + ("0" + dt.getDate()).slice(-2));
+   } else {
+     document.getElementById("date2").value = "";
+   }   
+}
+</script>
+
+</body>
+</html>
