@@ -1,0 +1,44 @@
+Imports System.IO
+
+Module Module1
+
+    Sub Main()
+
+        For Each foundFile As String In My.Computer.FileSystem.GetFiles("")
+            Dim fileContent As String
+
+            fileContent = GetFileContents(foundFile)
+
+            'file content is present in above variable just need to save it to a file
+            SaveToXMLFile(fileContent, "")
+
+        Next
+
+
+    End Sub
+
+    Public Function GetFileContents(ByVal FullPath As String) As String
+
+        Dim strContents As String
+        Dim objReader As StreamReader
+        Try
+            objReader = New StreamReader(FullPath)
+            strContents = objReader.ReadToEnd()
+            objReader.Close()
+            Return strContents
+        Catch Ex As Exception
+            Return String.Empty
+        End Try
+    End Function
+
+    Public Function SaveToXMLFile(ByVal strData As String, ByVal FullPath As String) As Boolean
+        Dim bAns As Boolean = False
+        Try
+           'Logic to write XML file here
+            bAns = True
+        Catch Ex As Exception
+        End Try
+        Return bAns
+    End Function
+
+End Module
