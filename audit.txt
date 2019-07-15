@@ -1,0 +1,23 @@
+SELECT 
+
+		 a.[Id]
+		,a.[Guid]
+		,a.[RevisionNumber]
+		,pa.[Status]
+		,un.[StaffName]		AS ModifiedBy
+		,ad.[X]
+		,ad.[Y]
+		,ad.[Z]
+		,axd.[X]
+		,axd.[Y]
+		,axd.[Z]
+	FROM
+					[dbo].[Audit]				as a
+		INNER JOIN	[dbo].[PassedAudit]			as pa	ON ( 
+																a.[Guid] = pa.[Guid] 
+															AND a.[RevisionNumber] = pa.[RevisionNumber]
+															AND pa.[Status] = 'Passed'
+														   )
+		INNER JOIN	[dbo].[AuditDetails]		as ad	ON ( ad.[Guid] = a.[Guid] AND a.[RevisionNumber] = ad.[RevisionNumber] )
+		INNER JOIN	[dbo].[AuditExtraDetails]	as axd	ON ( axd.[Guid] = a.[Guid] AND a.[RevisionNumber] = axd.[RevisionNumber] )
+		LEFT JOIN   [dbo].[UserName]			as un	ON un.StaffId = a.[ModifiedBy]
