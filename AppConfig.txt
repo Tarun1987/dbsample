@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.7.2" />
+    </startup>
+  <appSettings>
+    <add key="AppNames" value="NotePad|C:\WINDOWS\system32\notepad.exe||Chrome|C:\Program Files (x86)\Google\Chrome\Application\Chrome.exe" />
+  </appSettings>
+</configuration>

@@ -1,0 +1,116 @@
+using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Diagnostics;
+using System.IO;
+using System.ServiceProcess;
+using System.Timers;
+
+namespace MyFirstWindowsService
+{
+    public partial class TestService : ServiceBase
+    {
+        private Timer timer = new Timer();
+        private IList<MyProcess> _processNames;
+        public TestService()
+        {
+            InitializeComponent();
+            LoadProcesses();
+            // CheckProcessStatus();
+        }
+
+        protected override void OnStart(string[] args)
+        {
+            WriteToFile("Service is started at " + DateTime.Now);
+            timer.Elapsed += new ElapsedEventHandler(OnElapsedTime);
+            timer.Interval = 5000; //number in miliseconds  
+            timer.Enabled = true;
+        }
+
+        protected override void OnStop()
+        {
+            WriteToFile("Service is stopped at " + DateTime.Now);
+        }
+
+
+        #region private functions here
+
+        private void OnElapsedTime(object source, ElapsedEventArgs e)
+        {
+            CheckProcessStatus();
+        }
+
+        private void WriteToFile(string Message)
+        {
+            string path = AppDomain.CurrentDomain.BaseDirectory + "\\Logs";
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+            string filepath = AppDomain.CurrentDomain.BaseDirectory + "\\Logs\\ServiceLog_" + DateTime.Now.Date.ToShortDateString().Replace('/', '_') + ".txt";
+            if (!File.Exists(filepath))
+            {
+                // Create a file to write to.   
+                using (StreamWriter sw = File.CreateText(filepath))
+                {
+                    sw.WriteLine(Message);
+                }
+            }
+            else
+            {
+                using (StreamWriter sw = File.AppendText(filepath))
+                {
+                    sw.WriteLine(Message);
+                }
+            }
+        }
+
+        private void LoadProcesses()
+        {
+            var appNames = ConfigurationManager.AppSettings["AppNames"];
+            if (!string.IsNullOrWhiteSpace(appNames))
+            {
+                _processNames = new List<MyProcess>();
+                var list = appNames.Split(new string[] { "||" }, StringSplitOptions.None);
+                foreach (var item in list)
+                {
+                    var app = item.Split('|');
+                    var process = new MyProcess { Name = app[0], ExePath = app[1] };
+                    _processNames.Add(process);
+                }
+            }
+        }
+
+        private void CheckProcessStatus()
+        {
+            foreach (var mp in _processNames)
+            {
+                var pList = Process.GetProcessesByName(mp.Name);
+
+                // Check if a process is running
+                if (pList?.Length > 0)
+                {
+                    // If single process running
+                    if (pList.Length == 1)
+                        continue;
+
+                    WriteToFile($"Multiple process running: {mp.Name}");
+                    foreach (var p in pList)
+                        p.Kill();
+
+                }
+                else
+                    WriteToFile($"Process not running: {mp.Name}");
+
+
+                WriteToFile($"Trying to start process : {mp.Name}");
+                var process = Process.Start(mp.ExePath);
+                if (process.HasExited)
+                    WriteToFile($"Unable to start process : {mp.Name}");
+
+            }
+        }
+
+        #endregion
+    }
+}
