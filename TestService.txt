@@ -5,26 +5,34 @@ using System.Diagnostics;
 using System.IO;
 using System.ServiceProcess;
 using System.Timers;
+using System.Linq;
 
 namespace MyFirstWindowsService
 {
     public partial class TestService : ServiceBase
     {
-        private Timer timer = new Timer();
+        private Timer _timer = new Timer();
         private IList<MyProcess> _processNames;
+        private string _logPath;
+        private string _retryLogFilePrefix = "RetryLogs_";
+        private string _errorLogFilePrefix = "ServiceLog_";
+        private int _maxRetryCount;
+        private int _maxRetryHours;
         public TestService()
         {
+            _logPath = string.Format($"{AppDomain.CurrentDomain.BaseDirectory}\\Logs"); ;
+            _maxRetryCount = int.Parse(ConfigurationManager.AppSettings["MaxRetryCount"]);
+            _maxRetryHours = int.Parse(ConfigurationManager.AppSettings["MaxRetryHours"]);
             InitializeComponent();
             LoadProcesses();
-            // CheckProcessStatus();
         }
 
         protected override void OnStart(string[] args)
         {
             WriteToFile("Service is started at " + DateTime.Now);
-            timer.Elapsed += new ElapsedEventHandler(OnElapsedTime);
-            timer.Interval = 5000; //number in miliseconds  
-            timer.Enabled = true;
+            _timer.Elapsed += new ElapsedEventHandler(OnElapsedTime);
+            _timer.Interval = 5000; //number in miliseconds  
+            _timer.Enabled = true;
         }
 
         protected override void OnStop()
@@ -38,31 +46,6 @@ namespace MyFirstWindowsService
         private void OnElapsedTime(object source, ElapsedEventArgs e)
         {
             CheckProcessStatus();
-        }
-
-        private void WriteToFile(string Message)
-        {
-            string path = AppDomain.CurrentDomain.BaseDirectory + "\\Logs";
-            if (!Directory.Exists(path))
-            {
-                Directory.CreateDirectory(path);
-            }
-            string filepath = AppDomain.CurrentDomain.BaseDirectory + "\\Logs\\ServiceLog_" + DateTime.Now.Date.ToShortDateString().Replace('/', '_') + ".txt";
-            if (!File.Exists(filepath))
-            {
-                // Create a file to write to.   
-                using (StreamWriter sw = File.CreateText(filepath))
-                {
-                    sw.WriteLine(Message);
-                }
-            }
-            else
-            {
-                using (StreamWriter sw = File.AppendText(filepath))
-                {
-                    sw.WriteLine(Message);
-                }
-            }
         }
 
         private void LoadProcesses()
@@ -102,12 +85,113 @@ namespace MyFirstWindowsService
                 else
                     WriteToFile($"Process not running: {mp.Name}");
 
+                // Check if process has been tried starting for more than number of counts in past few hours.
+                // If so then don't try starting the process.
+                if (TryRunningProcess(mp.Name))
+                {
+                    WriteToFile($"Trying to start process : {mp.Name}");
+                    var process = Process.Start(mp.ExePath);
+                    if (process.HasExited)
+                    {
+                        LogFailureAttemptsToFile(mp.Name);
+                        WriteToFile($"Unable to start process : {mp.Name}");
+                    }
+                }
 
-                WriteToFile($"Trying to start process : {mp.Name}");
-                var process = Process.Start(mp.ExePath);
-                if (process.HasExited)
-                    WriteToFile($"Unable to start process : {mp.Name}");
+            }
+        }
 
+        private bool TryRunningProcess(string processName)
+        {
+            string filePath = string.Format($"{AppDomain.CurrentDomain.BaseDirectory}\\Logs\\{_retryLogFilePrefix}{DateTime.Now.Date.ToShortDateString().Replace('/', '_')}.txt");
+            if (!Directory.Exists(_logPath) || !File.Exists(filePath))
+                return true;
+
+            var fileText = File.ReadAllText(filePath);
+            var processLogsList = fileText.Split(new string[] { "||" }, StringSplitOptions.None);
+            bool canRetry = true;
+            for (int i = 0; i < processLogsList.Length; i++)
+            {
+                var retryLogs = processLogsList[i].Split('|');
+                if (processName == retryLogs[0])
+                {
+                    var pRetryCount = int.Parse(retryLogs[1]);
+                    var pInitialRetryStartHour = int.Parse(retryLogs[2]);
+
+                    if (DateTime.Now.Hour <= (pInitialRetryStartHour + _maxRetryHours) && pRetryCount > _maxRetryCount)
+                        canRetry = false;
+
+                    break;
+                }
+            }
+
+            return canRetry;
+        }
+
+        private void LogFailureAttemptsToFile(string processName)
+        {
+            string processLog = string.Format($"{processName}|1|{DateTime.Now.Hour}");
+            if (!Directory.Exists(_logPath))
+                Directory.CreateDirectory(_logPath);
+
+            string filePath = string.Format($"{AppDomain.CurrentDomain.BaseDirectory}\\Logs\\{_retryLogFilePrefix}{DateTime.Now.Date.ToShortDateString().Replace('/', '_')}.txt");
+            if (!File.Exists(filePath))
+            {
+                using (StreamWriter sw = File.CreateText(filePath))
+                    sw.WriteLine(processLog);
+            }
+            else
+            {
+                var fileText = File.ReadAllText(filePath);
+                var processLogsList = fileText.Split(new string[] { "||" }, StringSplitOptions.None);
+                bool processFoundInList = false;
+                for (int i = 0; i < processLogsList.Length; i++)
+                {
+                    var retryLogs = processLogsList[i].Split('|');
+                    if (processName == retryLogs[0])
+                    {
+                        var pRetryCount = int.Parse(retryLogs[1]);
+                        var pInitialRetryStartHour = int.Parse(retryLogs[2]);
+
+                        if (pRetryCount > _maxRetryCount)
+                            processLogsList[i] = string.Format($"{processName}|1|{DateTime.Now.Hour}");
+                        else
+                            processLogsList[i] = string.Format($"{processName}|{pRetryCount + 1}|{pInitialRetryStartHour}");
+
+                        processFoundInList = true;
+                        break;
+                    }
+                }
+
+                var newList = processLogsList.ToList();
+
+                if (!processFoundInList)
+                    newList.Add(string.Format($"{processName}|1|{DateTime.Now.Hour}"));
+
+                File.WriteAllText(filePath, string.Join("||", newList));
+            }
+
+        }
+
+        private void WriteToFile(string Message, string fileNamePrefix = null)
+        {
+            if (string.IsNullOrWhiteSpace(fileNamePrefix))
+                fileNamePrefix = _errorLogFilePrefix;
+
+            if (!Directory.Exists(_logPath))
+                Directory.CreateDirectory(_logPath);
+
+            string filePath = string.Format($"{AppDomain.CurrentDomain.BaseDirectory}\\Logs\\{fileNamePrefix}{DateTime.Now.Date.ToShortDateString().Replace('/', '_')}.txt");
+            if (!File.Exists(filePath))
+            {
+                // Create a file to write to.   
+                using (StreamWriter sw = File.CreateText(filePath))
+                    sw.WriteLine(Message);
+            }
+            else
+            {
+                using (StreamWriter sw = File.AppendText(filePath))
+                    sw.WriteLine(Message);
             }
         }
 

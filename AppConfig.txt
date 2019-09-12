@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <configuration>
-    <startup> 
-        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.7.2" />
-    </startup>
+  <startup>
+    <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.7.2" />
+  </startup>
   <appSettings>
-    <add key="AppNames" value="NotePad|C:\WINDOWS\system32\notepad.exe||Chrome|C:\Program Files (x86)\Google\Chrome\Application\Chrome.exe" />
+    <add key="AppNames" value="NotePad|C:\WINDOWS\system32\notepad.exe||SourceTree|C:\Users\TarunKhatana\AppData\Local\SourceTree\SourceTree.exe||Chrome|C:\Program Files (x86)\Google\Chrome\Application\Chrome.exe" />
+    <add key="MaxRetryCount" value="5" />
+    <add key="MaxRetryHours" value="0" />
   </appSettings>
 </configuration>
