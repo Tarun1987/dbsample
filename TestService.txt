@@ -78,8 +78,24 @@ namespace MyFirstWindowsService
                         continue;
 
                     WriteToFile($"Multiple process running: {mp.Name}");
+
+                    string arg = @"/c taskkill /f";
                     foreach (var p in pList)
-                        p.Kill();
+                        arg += " /pid " + p.Id;
+
+                    try
+                    {
+                        ProcessStartInfo process = new ProcessStartInfo("cmd");
+                        process.UseShellExecute = true;
+                        process.CreateNoWindow = true;
+                        process.Verb = "runas";
+                        process.Arguments = arg;
+                        Process.Start(process);
+                    }
+                    catch (Exception e)
+                    {
+                        WriteToFile($"Error occured while killing process: {mp.Name}, Error: {e.InnerException}");
+                    }
 
                 }
                 else
