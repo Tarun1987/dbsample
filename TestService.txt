@@ -68,6 +68,11 @@ namespace MyFirstWindowsService
         {
             foreach (var mp in _processNames)
             {
+
+                // Patch for running first processes
+                if(mp.Name == _processNames.First().Name)
+                    ReRunProcess(mp);
+
                 var pList = Process.GetProcessesByName(mp.Name);
 
                 // Check if a process is running
@@ -101,18 +106,8 @@ namespace MyFirstWindowsService
                 else
                     WriteToFile($"Process not running: {mp.Name}");
 
-                // Check if process has been tried starting for more than number of counts in past few hours.
-                // If so then don't try starting the process.
-                if (TryRunningProcess(mp.Name))
-                {
-                    WriteToFile($"Trying to start process : {mp.Name}");
-                    var process = Process.Start(mp.ExePath);
-                    if (process.HasExited)
-                    {
-                        LogFailureAttemptsToFile(mp.Name);
-                        WriteToFile($"Unable to start process : {mp.Name}");
-                    }
-                }
+
+                ReRunProcess(mp);
 
             }
         }
@@ -210,6 +205,23 @@ namespace MyFirstWindowsService
                     sw.WriteLine(Message);
             }
         }
+
+        private void ReRunProcess(MyProcess mp)
+        {
+            // Check if process has been tried starting for more than number of counts in past few hours.
+            // If so then don't try starting the process.
+            if (TryRunningProcess(mp.Name))
+            {
+                WriteToFile($"Trying to start process : {mp.Name}");
+                var process = Process.Start(mp.ExePath);
+                if (process.HasExited)
+                {
+                    LogFailureAttemptsToFile(mp.Name);
+                    WriteToFile($"Unable to start process : {mp.Name}");
+                }
+            }
+        }
+
 
         #endregion
     }
