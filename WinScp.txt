@@ -18,12 +18,13 @@ namespace SftpTest
                 SessionOptions sessionOptions = new SessionOptions
                 {
                     Protocol = Protocol.Sftp,
-                    HostName = "test.rebex.net",
-                    UserName = "demo",
-                    Password = "password",
-                   // SshHostKeyFingerprint = "ssh-ed25519 256 d7Te2DHmvBNSWJNBWik2KbDTjmWtYHe2bvXTMM9lVg4=",
-                    SshHostKeyFingerprint = "ssh-rsa 2048 03:61:c4:98:f1:ff:7d:23:97:51:07:13:88:b8:c5:55",
-                    PortNumber = 22
+                    HostName = "Host name",
+                    UserName = "User name",
+                    // Password = "password",
+                    // SshHostKeyFingerprint = "",
+                    //  SshHostKeyFingerprint = "",
+                    PortNumber = 22,
+                    SshPrivateKeyPath = "Path to your Private key file"
                 };
 
                 using (Session session = new Session())
