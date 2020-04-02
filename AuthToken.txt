@@ -11,7 +11,15 @@ namespace AuthToken
         {
             Console.WriteLine("Getting token");
             var authorizationToken = GetAuthorizationToken();
-            Console.WriteLine($"Token: {authorizationToken}");
+
+            if (string.IsNullOrWhiteSpace(authorizationToken))
+            {
+                Console.WriteLine("Token not found. So exiting code.");
+                return;
+            }
+
+            Console.WriteLine($"Getting protected resources. Token: {authorizationToken}");
+            GetProtectedResources(authorizationToken);
         }
 
         private static string GetAuthorizationToken()
@@ -42,11 +50,29 @@ namespace AuthToken
             return string.Empty;
         }
 
+        private static void GetProtectedResources(string authorizationToken)
+        {
+            var apiUrl = "http://something.com/api";
+
+            var client = new RestClient(apiUrl);
+            var request = new RestRequest(Method.GET);
+
+            request.AddHeader("cache-control", "no-cache");
+            request.AddHeader("authorization", $"Bearer {authorizationToken}");
+
+            IRestResponse response = client.Execute(request);
+            if (response.IsSuccessful)
+            {
+                // TODO Check a debugger here and see data here.
+                var data = response.Content;
+            }
+
+        }
 
         private static string GetEncodedString(string stringToEncode)
         {
             byte[] data = Encoding.ASCII.GetBytes(stringToEncode);
-            return System.Convert.ToBase64String(data);
+            return Convert.ToBase64String(data);
         }
     }
 }
