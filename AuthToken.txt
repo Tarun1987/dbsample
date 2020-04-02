@@ -1,0 +1,52 @@
+using RestSharp;
+using System;
+using System.Text;
+
+namespace AuthToken
+{
+    class Program
+    {
+
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Getting token");
+            var authorizationToken = GetAuthorizationToken();
+            Console.WriteLine($"Token: {authorizationToken}");
+        }
+
+        private static string GetAuthorizationToken()
+        {
+            // TODO: Enter these values according to your configurations
+
+            var apiUrl = "http://something.com/api";
+            var clientId = "Client_Id";
+            var clientSecret = "Client_Secret";
+            var userName = "username";
+            var password = "password";
+
+            var client = new RestClient(apiUrl);
+            var request = new RestRequest(Method.POST);
+
+            request.AddHeader("cache-control", "no-cache");
+            request.AddHeader("authorization", $"Basic {GetEncodedString($"{clientId}:{clientSecret}")}");
+            request.AddHeader("content-type", "application/x-www-form-urlencoded");
+            request.AddParameter("application/x-www-form-urlencoded", $"username={userName}&password={password}&grant_type=mcpm", ParameterType.RequestBody);
+
+            IRestResponse response = client.Execute(request);
+            if (response.IsSuccessful)
+            {
+                // TODO : Check which propety have token values
+                return "token";
+            }
+
+            return string.Empty;
+        }
+
+
+        private static string GetEncodedString(string stringToEncode)
+        {
+            byte[] data = Encoding.ASCII.GetBytes(stringToEncode);
+            return System.Convert.ToBase64String(data);
+        }
+    }
+}
